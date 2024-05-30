@@ -1,0 +1,5 @@
+pypdf
+langchain-openai
+pinecone-client
+langchain
+langchain-community
