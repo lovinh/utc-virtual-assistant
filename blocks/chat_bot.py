@@ -81,6 +81,7 @@ def render_chat_bot(subject_index : dict[str, str]) -> None:
                 )
         except Exception as Ex:
             print("Chatbot::Error::", Ex)
+            raise Ex
             with st.container():
                 st.markdown(
                     '<h1 style="text-align: center">😕 503 </h1>', unsafe_allow_html=True)
