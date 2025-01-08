@@ -5,6 +5,7 @@ from model.model import Model
 from model.FirebaseConnection import load_connection, FirebaseConnection
 import datetime
 from langchain_core.messages import HumanMessage
+import os
 
 
 def render_chat_bot(subject_index : dict[str, str]) -> None:
@@ -31,7 +32,7 @@ def render_chat_bot(subject_index : dict[str, str]) -> None:
                 index_name=INDEX,
                 openai_api_key=OPENAI_API_KEY,
                 pinecone_api_key=PINECONE_API_KEY,
-                prompt_file=r"data\prompt-template.txt"
+                prompt_file=os.path.join(os.getcwd(), "data", "prompt-template.txt")
             )
 
             ##### Page section #####
