@@ -3,11 +3,8 @@ from helpers.string_handler import *
 from helpers.cipher import *
 from model.model import Model
 from model.FirebaseConnection import load_connection, FirebaseConnection
-from model.SubjectIndexModel import SubjectIndexModel
-from google.cloud.firestore_v1.base_query import FieldFilter
 import datetime
 from langchain_core.messages import HumanMessage
-import pandas as pd
 
 
 def render_chat_bot(subject_index : dict[str, str]) -> None:
@@ -83,6 +80,7 @@ def render_chat_bot(subject_index : dict[str, str]) -> None:
                     }
                 )
         except Exception as Ex:
+            print("Chatbot::Error::", Ex)
             with st.container():
                 st.markdown(
                     '<h1 style="text-align: center">😕 503 </h1>', unsafe_allow_html=True)
