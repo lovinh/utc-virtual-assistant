@@ -1,4 +1,7 @@
 .venv
 .env
+.streamlit/secrets.toml
 helpers/__pycache__
 model/__pycache__
+blocks/__pycache__
+tools/__pycache__

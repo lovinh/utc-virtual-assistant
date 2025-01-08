@@ -3,3 +3,7 @@ langchain-openai
 pinecone-client
 langchain
 langchain-community
+st-star-rating
+st-gsheets-connection
+firebase-admin
+pycryptodome

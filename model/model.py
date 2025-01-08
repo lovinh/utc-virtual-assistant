@@ -1,14 +1,14 @@
-from langchain_openai import OpenAI, ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI
+from langchain_community.callbacks import get_openai_callback
+from langchain_core.messages import AIMessage
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pinecone import Pinecone
 from langchain.vectorstores import Pinecone as LCPinecone
-# from langchain.chains.combine_documents import create_stuff_documents_chain
+from helpers.string_handler import *
 
 class Model:
-    def __init__(self, model_name : str, embedding_name : str, openai_api_key : str, pinecone_api_key : str, index_name : str) -> None:
+    def __init__(self, model_name : str, embedding_name : str, openai_api_key : str, pinecone_api_key : str, index_name : str, prompt_file : str) -> None:
         self.__llm : ChatOpenAI = ChatOpenAI(model=model_name)
         self.__embeddings = OpenAIEmbeddings(model=embedding_name)
         self.__pc = Pinecone(api_key=pinecone_api_key)
@@ -20,30 +20,36 @@ class Model:
              [
                 (
                     "system",
-                    """
-Bạn là một nhân viên hỗ trợ sinh viên của trường Đại học Giao thông vận tải với nhiệm vụ trả lời các thắc mắc đến từ sinh viên của trường. Trước hết, bạn phải luôn luôn chào các sinh viên. Sử dụng các đoạn thông tin phía dưới đây để trả lời câu hỏi từ người dùng. Nếu bạn không thể tìm thấy đáp án từ đoạn thông tin, hãy phản hồi: Rất Xin lỗi, tôi không thể tìm thấy thông tin phù hợp để trả lời câu hỏi của bạn. Xin vui lòng liên hệ với văn phòng khoa hoặc văn phòng nhà trường để được giải quyết.
-
-Danh sách thông tin:
-{source_knowledge}
-""",
+                    read_from_file(prompt_file),
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
         )
         self.__chain = self.__prompt | self.__llm
 
+
     def invoke(self, user_query : str, chat_history : list) -> AIMessage:
         ai_response = self.__chain.invoke({
             'messages' : chat_history
         })
         return ai_response
-    def get_rag(self, user_query, chat_history : list):
-        ai_response = self.__chain.invoke({
-            'messages' : chat_history,
-            'source_knowledge':"\n\n".join([item.page_content for item in self.retrieve(user_query)])
-        })
-        return ai_response
-    
+
+    def get_rag(self, chat_history : list):
+        user_query = chat_history[len(chat_history) - 1].content
+        ai_response = None
+        cost : float = 0
+        with get_openai_callback() as cb:
+            ai_response = self.__chain.invoke({
+                'messages' : chat_history,
+                'source_knowledge':"\n\n".join([item.page_content for item in self.retrieve(user_query)])
+            })
+            cost = cb.total_cost
+        return ai_response, cost
+
     def retrieve(self, user_query : str, top_k : int = 5):
         retrieve_doc = self.__vectorstore.similarity_search(user_query, k=top_k)
         return retrieve_doc
+
+    def get_rag_agent(self, chat_history : list):
+        ai_response = self.__agent_executer.invoke({'messages' : chat_history})
+        return ai_response
