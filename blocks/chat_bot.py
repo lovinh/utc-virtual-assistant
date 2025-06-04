@@ -17,6 +17,8 @@ def render_chat_bot(subject_index : dict[str, str]) -> None:
     EMBEDDING = st.secrets["EMBEDDING"]
     INDEX = subject_index.get("index_name")
     STATUS = subject_index.get("status")
+    print("Chatbot status:", STATUS)
+    print("Chatbot INDEX:", INDEX)
     if STATUS == "unavailable" or INDEX is None or INDEX == "":
         with st.container():
             st.markdown(
