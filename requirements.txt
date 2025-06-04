@@ -1,6 +1,6 @@
 pypdf
 langchain-openai
-pinecone-client
+pinecone
 langchain
 langchain-community
 st-star-rating
